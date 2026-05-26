@@ -1,0 +1,13 @@
+name: Build NASHR APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # تشغيل يدوي من GitHub
+
+jobs:
+  build:
+    uses: mohamedghanem-dev/workflows/.github/workflows/build-apk.yml@main
+    with:
+      app-name: "NASHR PRO"
+      app-id: "dev.mohamedghanem.nashr"

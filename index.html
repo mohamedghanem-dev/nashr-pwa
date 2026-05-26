@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#060610">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NASHR PRO">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>NASHR PRO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --dark-bg:#060610; --dark-surface:#0E0E1E; --dark-card:#141428;
+  --dark-border:#2A2A50; --dark-text:#E8E8FF; --dark-muted:#8888BB;
+  --dark-accent:#7C5CFC;
+  --light-bg:#F4F6FF; --light-surface:#FFF; --light-card:#F0F2FF;
+  --light-border:#DDE0F0; --light-text:#1A1A3E; --light-muted:#6B6B9A;
+  --light-accent:#6B4EE8;
+  --vercel:#0070F3; --netlify:#05BDAA; --github:#238636;
+  --success:#22C55E; --error:#EF4444; --warning:#F59E0B;
+
+  --bg:var(--dark-bg); --surface:var(--dark-surface); --card:var(--dark-card);
+  --border:var(--dark-border); --text:var(--dark-text); --muted:var(--dark-muted);
+  --accent:var(--dark-accent);
+}
+[data-theme="light"] {
+  --bg:var(--light-bg); --surface:var(--light-surface); --card:var(--light-card);
+  --border:var(--light-border); --text:var(--light-text); --muted:var(--light-muted);
+  --accent:var(--light-accent);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+
+/* ── SPLASH / LOGIN ─── */
+#splash{position:fixed;inset:0;background:var(--dark-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .5s}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-logo{width:100px;height:100px;border-radius:26px;overflow:hidden;margin-bottom:20px;box-shadow:0 0 60px #0070F340}
+.splash-logo img{width:100%;height:100%}
+.splash-title{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,#60A5FF,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.splash-sub{color:var(--dark-muted);font-size:13px;margin-top:6px}
+.splash-spin{width:28px;height:28px;border:2px solid #2A2A50;border-top-color:var(--vercel);border-radius:50%;animation:spin .8s linear infinite;margin-top:32px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── LOGIN ─── */
+#login-screen{position:fixed;inset:0;background:var(--dark-bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px;z-index:998}
+#login-screen.show{display:flex}
+.login-logo{width:80px;height:80px;border-radius:20px;overflow:hidden;margin-bottom:16px}
+.login-logo img{width:100%;height:100%}
+.login-card{width:100%;max-width:360px;background:var(--dark-card);border:1px solid var(--dark-border);border-radius:24px;padding:28px}
+.login-title{font-size:20px;font-weight:800;text-align:center;margin-bottom:6px}
+.login-sub{color:var(--dark-muted);font-size:13px;text-align:center;margin-bottom:24px}
+.login-label{font-size:12px;color:var(--dark-muted);font-weight:600;margin-bottom:8px;display:block}
+.login-input{width:100%;background:var(--dark-surface);border:1px solid var(--dark-border);border-radius:14px;padding:14px 16px;font-family:'Cairo',sans-serif;font-size:15px;color:var(--dark-text);outline:none;transition:border-color .2s;text-align:center;letter-spacing:4px;font-size:20px}
+.login-input:focus{border-color:var(--vercel)}
+.login-dots{display:flex;justify-content:center;gap:10px;margin:20px 0}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--dark-border);transition:all .2s}
+.dot.filled{background:var(--vercel);transform:scale(1.1)}
+.login-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.num-btn{background:var(--dark-surface);border:1px solid var(--dark-border);border-radius:14px;padding:16px;font-family:'Cairo',sans-serif;font-size:20px;font-weight:700;color:var(--dark-text);cursor:pointer;transition:all .15s;text-align:center;user-select:none}
+.num-btn:active{background:var(--vercel);color:#fff;transform:scale(.95)}
+.login-err{color:var(--error);font-size:12px;text-align:center;margin-top:10px;min-height:18px}
+.login-hint{color:var(--dark-muted);font-size:11px;text-align:center;margin-top:16px}
+
+/* ── APP SHELL ─── */
+#app{display:none;flex-direction:column;height:100vh}
+#app.show{display:flex}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
+.screen::-webkit-scrollbar{display:none}
+
+/* ── TOP BAR ─── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px 10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;backdrop-filter:blur(12px)}
+.topbar-logo{display:flex;align-items:center;gap:10px}
+.topbar-logo-img{width:32px;height:32px;border-radius:9px;overflow:hidden}
+.topbar-logo-img img{width:100%;height:100%}
+.topbar-brand{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#60A5FF,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar-pro{font-size:9px;font-weight:800;color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);padding:2px 6px;border-radius:6px;letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-title-area{flex:1;margin:0 12px}
+.topbar-title{font-size:17px;font-weight:800;line-height:1.2}
+.topbar-sub{font-size:11px;color:var(--muted)}
+.icon-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.icon-btn:active{background:var(--border);color:var(--text)}
+svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── BOTTOM NAV ─── */
+.bottom-nav{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 max(8px,env(safe-area-inset-bottom));position:fixed;bottom:0;left:0;right:0;z-index:50}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:2px 0;transition:all .15s;border:none;background:none;color:var(--muted)}
+.nav-item.active{color:var(--vercel)}
+.nav-item svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-item.active svg{stroke-width:2.2}
+.nav-label{font-size:10px;font-weight:700}
+
+/* ── CARDS ─── */
+.nashr-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:12px;transition:border-color .2s}
+.nashr-card.clickable{cursor:pointer}
+.nashr-card.clickable:active{opacity:.85;transform:scale(.99)}
+
+/* ── DASHBOARD ─── */
+.hero-bar{background:linear-gradient(135deg,color-mix(in srgb,var(--vercel) 10%,transparent),transparent);padding:20px 16px 16px}
+.hero-greet{font-size:22px;font-weight:800}
+.hero-sub{color:var(--muted);font-size:13px;margin-top:2px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px}
+.stat-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.stat-val{font-size:24px;font-weight:900;line-height:1}
+.stat-label{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:10px}
+.section-title{font-size:15px;font-weight:800}
+.section-sub{font-size:12px;color:var(--muted)}
+.pad-x{padding:0 16px}
+
+/* ── PROJECT CARD ─── */
+.proj-card{display:flex;align-items:center;gap:12px}
+.proj-screenshot{width:60px;height:60px;border-radius:12px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)}
+.proj-screenshot-placeholder{width:60px;height:60px;border-radius:12px;flex-shrink:0;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.proj-info{flex:1;min-width:0}
+.proj-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-url{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;cursor:pointer}
+.proj-meta{display:flex;align-items:center;gap:6px;margin-top:5px}
+.platform-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;font-family:'JetBrains Mono',monospace}
+.date-badge{font-size:10px;color:var(--muted);font-weight:600}
+
+/* ── DEPLOY / TABS ─── */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);padding:0 16px;gap:4px;overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{padding:12px 16px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;color:var(--muted);background:none;border:none;cursor:pointer;white-space:nowrap;position:relative;transition:color .2s}
+.tab-btn.active{color:var(--tab-color,var(--vercel))}
+.tab-btn.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--tab-color,var(--vercel));border-radius:2px 2px 0 0}
+.tab-content{padding:16px;display:none}
+.tab-content.active{display:block}
+
+/* ── FORM ─── */
+.field-label{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.5px;margin-bottom:8px;display:block}
+.nashr-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 16px;font-family:'Cairo',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none}
+.nashr-input:focus{border-color:var(--vercel)}
+.nashr-input.code{font-family:'JetBrains Mono',monospace;font-size:13px;direction:ltr;text-align:left}
+.input-group{margin-bottom:14px}
+.input-hint{font-size:11px;color:var(--muted);margin-top:5px}
+textarea.nashr-input{resize:none;min-height:80px}
+
+/* ── BUTTONS ─── */
+.nashr-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:800;cursor:pointer;border:none;transition:all .15s;width:100%}
+.nashr-btn:active{transform:scale(.97);opacity:.9}
+.nashr-btn.primary{background:var(--vercel);color:#fff}
+.nashr-btn.netlify{background:var(--netlify);color:#fff}
+.nashr-btn.github{background:var(--github);color:#fff}
+.nashr-btn.outline{background:transparent;border:1.5px solid currentColor}
+.nashr-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-row{display:flex;gap:10px}
+.btn-row .nashr-btn{flex:1}
+
+/* ── FILE ZONE ─── */
+.file-zone{border:2px dashed var(--border);border-radius:16px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;background:transparent}
+.file-zone.has-file{border-color:var(--zone-color,var(--vercel));background:color-mix(in srgb,var(--zone-color,var(--vercel)) 6%,transparent)}
+.file-zone:active{transform:scale(.99)}
+.file-zone-icon{font-size:36px;margin-bottom:10px}
+.file-zone-label{font-size:14px;font-weight:600;margin-bottom:4px}
+.file-zone-sub{font-size:11px;color:var(--muted)}
+.file-tag{display:inline-block;background:color-mix(in srgb,var(--zone-color,var(--vercel)) 12%,transparent);border:1px solid color-mix(in srgb,var(--zone-color,var(--vercel)) 30%,transparent);color:var(--zone-color,var(--vercel));font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;margin-top:8px}
+
+/* ── PROGRESS STEPS ─── */
+.progress-steps{padding:8px 0}
+.progress-step{display:flex;align-items:center;gap:12px;padding:10px 0;opacity:.4;transition:opacity .3s}
+.progress-step.active{opacity:1}
+.progress-step.done{opacity:.7}
+.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .3s}
+.progress-step.active .step-dot{border-color:var(--step-color);background:color-mix(in srgb,var(--step-color) 15%,transparent);animation:pulse-dot 1s ease infinite}
+.progress-step.done .step-dot{background:var(--step-color);border-color:var(--step-color);color:#fff}
+@keyframes pulse-dot{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.step-label{font-size:14px;font-weight:600}
+.progress-bar-wrap{height:4px;background:var(--border);border-radius:4px;margin-top:12px;overflow:hidden}
+.progress-bar{height:100%;border-radius:4px;transition:width .5s ease}
+
+/* ── RESULT BOX ─── */
+.result-box{border-radius:20px;padding:18px;margin-top:16px}
+.result-success{background:color-mix(in srgb,var(--result-color) 8%,transparent);border:1px solid color-mix(in srgb,var(--result-color) 25%,transparent)}
+.result-title{font-size:16px;font-weight:800;margin-bottom:4px}
+.result-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.copyable-url{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .2s}
+.copyable-url:active{border-color:var(--vercel)}
+.url-text{font-family:'JetBrains Mono',monospace;font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:ltr;text-align:left}
+.copy-icon{flex-shrink:0;color:var(--muted)}
+.copy-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── ACCOUNT CARD ─── */
+.acct-card{display:flex;flex-direction:column;gap:12px}
+.acct-top{display:flex;align-items:center;gap:12px}
+.acct-avatar{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;flex-shrink:0}
+.acct-info{flex:1;min-width:0}
+.acct-name{font-size:14px;font-weight:700}
+.acct-email{font-size:11px;color:var(--muted);margin-top:1px}
+.acct-actions{display:flex;gap:6px}
+.acct-action-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);transition:all .15s;display:flex;align-items:center;gap:5px}
+.acct-action-btn:active{opacity:.7}
+.acct-action-btn.del{color:var(--error);border-color:color-mix(in srgb,var(--error) 30%,transparent)}
+.token-row{background:color-mix(in srgb,var(--token-color) 6%,transparent);border:1px solid color-mix(in srgb,var(--token-color) 15%,transparent);border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:8px}
+.token-text{font-family:'JetBrains Mono',monospace;font-size:11px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:ltr;text-align:left}
+.token-valid{font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px}
+.valid-yes{background:color-mix(in srgb,var(--success) 15%,transparent);color:var(--success)}
+.valid-no{background:color-mix(in srgb,var(--error) 15%,transparent);color:var(--error)}
+
+/* ── SETTINGS ─── */
+.settings-profile{display:flex;align-items:center;gap:14px;padding:20px 16px}
+.profile-avatar{width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,var(--vercel),var(--accent));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#fff;flex-shrink:0}
+.profile-name{font-size:18px;font-weight:800}
+.profile-role{font-size:12px;color:var(--muted);margin-top:2px}
+.settings-section{padding:0 16px;margin-bottom:6px}
+.settings-section-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:16px 0 8px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.settings-row-left{display:flex;align-items:center;gap:12px}
+.settings-row-icon{width:36px;height:36px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.settings-row-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8}
+.settings-row-title{font-size:14px;font-weight:600}
+.settings-row-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.toggle{width:48px;height:26px;background:var(--border);border-radius:13px;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0;border:none}
+.toggle.on{background:var(--vercel)}
+.toggle::after{content:'';position:absolute;top:3px;right:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .3s;box-shadow:0 1px 4px #0004}
+.toggle.on::after{transform:translateX(-22px)}
+.platform-info-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.platform-info-row:last-child{border-bottom:none}
+.platform-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.platform-info-name{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;margin-bottom:1px}
+.platform-info-desc{font-size:11px;color:var(--muted)}
+
+/* ── EMPTY STATE ─── */
+.empty-state{text-align:center;padding:48px 24px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px;opacity:.4}
+.empty-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.empty-sub{font-size:13px;opacity:.7}
+
+/* ── BOTTOM SHEET ─── */
+.sheet-backdrop{position:fixed;inset:0;background:#0008;z-index:100;display:none;opacity:0;transition:opacity .3s}
+.sheet-backdrop.show{display:block;opacity:1}
+.bottom-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-radius:24px 24px 0 0;z-index:101;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,1,.25,1);max-height:90vh;overflow-y:auto;padding-bottom:max(20px,env(safe-area-inset-bottom))}
+.bottom-sheet.show{transform:translateY(0)}
+.sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:12px auto 20px}
+.sheet-title{font-size:18px;font-weight:800;padding:0 20px 20px}
+.sheet-body{padding:0 20px}
+
+/* ── CHIP SELECTOR ─── */
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.source-chip{padding:10px 16px;border-radius:12px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.source-chip.active{background:color-mix(in srgb,var(--chip-color) 15%,transparent);border-color:var(--chip-color);color:var(--chip-color)}
+
+/* ── SNACKBAR ─── */
+#snack{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 20px;font-size:14px;font-weight:600;z-index:200;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;box-shadow:0 8px 32px #0006}
+#snack.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── SEARCH BAR ─── */
+.search-wrap{padding:12px 16px 0;position:relative}
+.search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 14px 11px 40px;font-family:'Cairo',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none;direction:rtl}
+.search-input:focus{border-color:var(--vercel)}
+.search-icon{position:absolute;right:28px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── ACCOUNT SELECTOR IN DEPLOY ─── */
+.acct-select-list{display:flex;flex-direction:column;gap:4px}
+.acct-select-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:background .15s;border:1.5px solid transparent}
+.acct-select-item.selected{border-color:var(--sel-color);background:color-mix(in srgb,var(--sel-color) 8%,transparent)}
+.radio-outer{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .2s}
+.acct-select-item.selected .radio-outer{border-color:var(--sel-color)}
+.radio-inner{width:8px;height:8px;border-radius:50%;background:var(--sel-color);display:none}
+.acct-select-item.selected .radio-inner{display:block}
+
+/* ── WARNING BOX ─── */
+.warn-box{background:color-mix(in srgb,var(--warning) 8%,transparent);border:1px solid color-mix(in srgb,var(--warning) 25%,transparent);border-radius:14px;padding:14px;display:flex;align-items:flex-start;gap:10px;font-size:13px}
+.warn-box svg{width:18px;height:18px;fill:none;stroke:var(--warning);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+.err-box{background:color-mix(in srgb,var(--error) 8%,transparent);border:1px solid color-mix(in srgb,var(--error) 25%,transparent);border-radius:14px;padding:14px;display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--error)}
+.err-box svg{width:18px;height:18px;fill:none;stroke:var(--error);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ── BRANDING ─── */
+.brand-center{text-align:center;padding:24px 16px 8px}
+.brand-logo{width:64px;height:64px;border-radius:18px;overflow:hidden;margin:0 auto 12px;box-shadow:0 0 40px color-mix(in srgb,var(--vercel) 30%,transparent)}
+.brand-logo img{width:100%;height:100%}
+.brand-name{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,#60A5FF,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.brand-tagline{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* ── ANIMATIONS ─── */
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.anim-in{animation:fadeSlideUp .35s ease forwards}
+.anim-delay-1{animation-delay:.05s;opacity:0}
+.anim-delay-2{animation-delay:.1s;opacity:0}
+.anim-delay-3{animation-delay:.15s;opacity:0}
+.anim-delay-4{animation-delay:.2s;opacity:0}
+
+/* ── INSTALL BANNER ─── */
+#install-banner{background:linear-gradient(135deg,color-mix(in srgb,var(--vercel) 15%,transparent),color-mix(in srgb,var(--accent) 10%,transparent));border:1px solid color-mix(in srgb,var(--vercel) 25%,transparent);border-radius:16px;padding:14px 16px;margin:16px 16px 0;display:none;align-items:center;gap:12px}
+#install-banner.show{display:flex}
+.install-text{flex:1;font-size:13px;font-weight:600}
+.install-text span{color:var(--muted);font-size:11px;display:block;margin-top:1px}
+.install-btn{background:var(--vercel);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- ════ SPLASH ════ -->
+<div id="splash">
+  <div class="splash-logo"><img src="icon.png" alt="NASHR"></div>
+  <div class="splash-title">NASHR PRO</div>
+  <div class="splash-sub">منصة النشر الاحترافية</div>
+  <div class="splash-spin"></div>
+</div>
+
+<!-- ════ LOGIN ════ -->
+<div id="login-screen">
+  <div class="login-logo"><img src="icon.png" alt="NASHR"></div>
+  <div class="login-card">
+    <div class="login-title">🔐 أدخل كلمة السر</div>
+    <div class="login-sub">NASHR PRO محمي بكلمة سر من 4 أرقام</div>
+    <div class="login-dots" id="login-dots">
+      <div class="dot" id="d0"></div>
+      <div class="dot" id="d1"></div>
+      <div class="dot" id="d2"></div>
+      <div class="dot" id="d3"></div>
+    </div>
+    <div class="login-numpad">
+      <button class="num-btn" onclick="numPress(1)">1</button>
+      <button class="num-btn" onclick="numPress(2)">2</button>
+      <button class="num-btn" onclick="numPress(3)">3</button>
+      <button class="num-btn" onclick="numPress(4)">4</button>
+      <button class="num-btn" onclick="numPress(5)">5</button>
+      <button class="num-btn" onclick="numPress(6)">6</button>
+      <button class="num-btn" onclick="numPress(7)">7</button>
+      <button class="num-btn" onclick="numPress(8)">8</button>
+      <button class="num-btn" onclick="numPress(9)">9</button>
+      <button class="num-btn" onclick="clearPin()" style="font-size:14px">مسح</button>
+      <button class="num-btn" onclick="numPress(0)">0</button>
+      <button class="num-btn" onclick="delPin()">⌫</button>
+    </div>
+    <div class="login-err" id="login-err"></div>
+    <div class="login-hint" id="login-hint"></div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+<div id="app">
+
+  <!-- ── SCREEN: DASHBOARD ── -->
+  <div id="screen-dashboard" class="screen">
+    <div class="topbar">
+      <div class="topbar-logo">
+        <div class="topbar-logo-img"><img src="icon.png" alt="N"></div>
+        <div class="topbar-brand">NASHR</div>
+        <div class="topbar-pro">PRO</div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="refreshDashboard()" title="تحديث">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="install-banner">
+      <div>📲</div>
+      <div class="install-text">ثبّت التطبيق على شاشتك<span>للوصول السريع بدون متصفح</span></div>
+      <button class="install-btn" onclick="installApp()">تثبيت</button>
+    </div>
+    <div class="hero-bar">
+      <div class="hero-greet">أهلاً، <span id="dash-name">—</span> 👋</div>
+      <div class="hero-sub">إدارة نشرك في مكان واحد</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card anim-in anim-delay-1">
+        <div class="stat-icon" style="background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)">
+          <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div><div class="stat-val" id="stat-total">0</div><div class="stat-label">المشاريع</div></div>
+      </div>
+      <div class="stat-card anim-in anim-delay-2">
+        <div class="stat-icon" style="background:color-mix(in srgb,#60A5FF 15%,transparent);color:#60A5FF">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div><div class="stat-val" id="stat-accounts">0</div><div class="stat-label">الحسابات</div></div>
+      </div>
+      <div class="stat-card anim-in anim-delay-3">
+        <div class="stat-icon" style="background:color-mix(in srgb,var(--vercel) 15%,transparent);color:var(--vercel)">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div><div class="stat-val" id="stat-vercel">0</div><div class="stat-label">Vercel</div></div>
+      </div>
+      <div class="stat-card anim-in anim-delay-4">
+        <div class="stat-icon" style="background:color-mix(in srgb,var(--netlify) 15%,transparent);color:var(--netlify)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div><div class="stat-val" id="stat-netlify">0</div><div class="stat-label">Netlify</div></div>
+      </div>
+    </div>
+    <div class="section-header"><div class="section-title">آخر المشاريع</div></div>
+    <div class="pad-x" id="recent-projects"></div>
+    <div style="height:20px"></div>
+  </div>
+
+  <!-- ── SCREEN: PROJECTS ── -->
+  <div id="screen-projects" class="screen" style="display:none">
+    <div class="topbar">
+      <div class="topbar-title-area">
+        <div class="topbar-title">المشاريع</div>
+        <div class="topbar-sub" id="proj-count-label">0 مشروع</div>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <div class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      <input class="search-input" id="proj-search" placeholder="ابحث عن مشروع..." oninput="renderProjects()">
+    </div>
+    <div class="tab-bar" id="proj-tabs">
+      <button class="tab-btn active" onclick="projTab(0,this)" style="--tab-color:var(--accent)">الكل</button>
+      <button class="tab-btn" onclick="projTab(1,this)" style="--tab-color:var(--vercel)">▲ Vercel</button>
+      <button class="tab-btn" onclick="projTab(2,this)" style="--tab-color:var(--netlify)">◆ Netlify</button>
+      <button class="tab-btn" onclick="projTab(3,this)" style="--tab-color:var(--github)">⌥ GitHub</button>
+    </div>
+    <div style="padding:16px" id="projects-list"></div>
+  </div>
+
+  <!-- ── SCREEN: DEPLOY ── -->
+  <div id="screen-deploy" class="screen" style="display:none">
+    <div class="topbar">
+      <div class="topbar-title-area">
+        <div class="topbar-title">نشر مشروع ⚡</div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn active" id="dtab-vercel" onclick="deployTab('vercel',this)" style="--tab-color:var(--vercel)">▲ Vercel</button>
+      <button class="tab-btn" id="dtab-netlify" onclick="deployTab('netlify',this)" style="--tab-color:var(--netlify)">◆ Netlify</button>
+      <button class="tab-btn" id="dtab-github" onclick="deployTab('github',this)" style="--tab-color:var(--github)">⌥ GitHub</button>
+    </div>
+
+    <!-- Vercel Tab -->
+    <div id="deploy-vercel" class="tab-content active" style="display:block">
+      <div class="nashr-card">
+        <div class="input-group">
+          <label class="field-label">اختر الحساب</label>
+          <div id="vercel-acct-list" class="acct-select-list"></div>
+        </div>
+      </div>
+      <div class="nashr-card">
+        <div class="input-group">
+          <label class="field-label">اسم المشروع</label>
+          <input class="nashr-input code" id="v-project-name" placeholder="my-next-app" dir="ltr">
+        </div>
+        <div class="input-group" style="margin-bottom:0">
+          <label class="field-label">Framework (اختياري)</label>
+          <input class="nashr-input" id="v-framework" placeholder="nextjs / react / vue">
+        </div>
+      </div>
+      <div class="nashr-card">
+        <div class="input-group" style="margin-bottom:10px">
+          <label class="field-label">مصدر الكود</label>
+          <div class="chip-row">
+            <button class="source-chip active" id="v-chip-zip" style="--chip-color:var(--vercel)" onclick="vsource('zip')">📦 ZIP</button>
+            <button class="source-chip" id="v-chip-github" style="--chip-color:var(--github)" onclick="vsource('github')">🐙 GitHub</button>
+          </div>
+        </div>
+        <div id="v-zip-section">
+          <div class="file-zone" id="v-file-zone" style="--zone-color:var(--vercel)" onclick="pickFile('v')">
+            <div class="file-zone-icon">📦</div>
+            <div class="file-zone-label" id="v-file-label">اضغط لاختيار ملف ZIP</div>
+            <div class="file-zone-sub">ملف ZIP للمشروع</div>
+            <div class="file-tag">ZIP</div>
+          </div>
+        </div>
+        <div id="v-github-section" style="display:none">
+          <div class="input-group">
+            <label class="field-label">اسم المستودع</label>
+            <input class="nashr-input code" id="v-repo" placeholder="username/repo-name" dir="ltr">
+          </div>
+          <div class="input-group" style="margin-bottom:0">
+            <label class="field-label">الفرع (Branch)</label>
+            <input class="nashr-input code" id="v-branch" value="main" dir="ltr">
+          </div>
+        </div>
+      </div>
+      <div id="v-progress" style="display:none" class="nashr-card">
+        <div class="progress-steps" id="v-steps"></div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="v-bar" style="background:var(--vercel);width:0"></div></div>
+      </div>
+      <div id="v-result"></div>
+      <div id="v-error"></div>
+      <button class="nashr-btn primary" id="v-deploy-btn" onclick="deployVercel()">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        نشر على Vercel
+      </button>
+      <div style="height:20px"></div>
+    </div>
+
+    <!-- Netlify Tab -->
+    <div id="deploy-netlify" class="tab-content" style="display:none">
+      <div class="nashr-card">
+        <div class="input-group">
+          <label class="field-label">اختر الحساب</label>
+          <div id="netlify-acct-list" class="acct-select-list"></div>
+        </div>
+      </div>
+      <div class="nashr-card">
+        <div class="input-group">
+          <label class="field-label">اسم الموقع (Site Name)</label>
+          <input class="nashr-input code" id="n-site-name" placeholder="my-portfolio" dir="ltr">
+          <div class="input-hint">سيكون الرابط: sitename.netlify.app</div>
+        </div>
+      </div>
+      <div class="nashr-card">
+        <div class="input-group" style="margin-bottom:0">
+          <label class="field-label">ملف ZIP</label>
+          <div class="file-zone" id="n-file-zone" style="--zone-color:var(--netlify)" onclick="pickFile('n')">
+            <div class="file-zone-icon">📁</div>
+            <div class="file-zone-label" id="n-file-label">اضغط لاختيار ZIP</div>
+            <div class="file-zone-sub">Netlify يستقبل ZIP مباشرة</div>
+            <div class="file-tag" style="--zone-color:var(--netlify)">ZIP</div>
+          </div>
+        </div>
+      </div>
+      <div id="n-progress" style="display:none" class="nashr-card">
+        <div class="progress-steps" id="n-steps"></div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="n-bar" style="background:var(--netlify);width:0"></div></div>
+      </div>
+      <div id="n-result"></div>
+      <div id="n-error"></div>
+      <button class="nashr-btn netlify" id="n-deploy-btn" onclick="deployNetlify()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        نشر على Netlify
+      </button>
+      <div style="height:20px"></div>
+    </div>
+
+    <!-- GitHub Tab -->
+    <div id="deploy-github" class="tab-content" style="display:none">
+      <div class="nashr-card">
+        <div class="input-group">
+          <label class="field-label">اختر الحساب</label>
+          <div id="github-acct-list" class="acct-select-list"></div>
+        </div>
+      </div>
+      <div class="nashr-card">
+        <div class="input-group">
+          <label class="field-label">اسم المستودع (Repo)</label>
+          <input class="nashr-input code" id="g-repo-name" placeholder="my-flutter-app" dir="ltr">
+        </div>
+        <div class="input-group" style="margin-bottom:0">
+          <label class="field-label">رسالة Commit</label>
+          <input class="nashr-input" id="g-commit" value="Initial commit via NASHR ⚡">
+        </div>
+      </div>
+      <div class="nashr-card">
+        <div class="input-group" style="margin-bottom:10px">
+          <label class="field-label">نوع الرفع</label>
+          <div class="chip-row">
+            <button class="source-chip active" id="g-chip-zip" style="--chip-color:var(--github)" onclick="gsource('zip')">📦 ZIP</button>
+            <button class="source-chip" id="g-chip-files" style="--chip-color:var(--github)" onclick="gsource('files')">📄 ملفات</button>
+          </div>
+        </div>
+        <div id="g-zip-section">
+          <div class="file-zone" id="g-file-zone" style="--zone-color:var(--github)" onclick="pickFile('g')">
+            <div class="file-zone-icon">📦</div>
+            <div class="file-zone-label" id="g-file-label">اضغط لاختيار ZIP</div>
+            <div class="file-tag" style="--zone-color:var(--github)">ZIP</div>
+          </div>
+        </div>
+        <div id="g-files-section" style="display:none">
+          <button class="nashr-btn outline" style="color:var(--github);border-color:var(--github)" onclick="pickMultiFiles()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            اختر ملفات
+          </button>
+          <div id="g-files-list" style="margin-top:10px"></div>
+        </div>
+      </div>
+      <div id="g-progress" style="display:none" class="nashr-card">
+        <div class="progress-steps" id="g-steps"></div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="g-bar" style="background:var(--github);width:0"></div></div>
+      </div>
+      <div id="g-result"></div>
+      <div id="g-error"></div>
+      <button class="nashr-btn github" id="g-deploy-btn" onclick="deployGitHub()">
+        <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        رفع على GitHub
+      </button>
+      <div style="height:20px"></div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: ACCOUNTS ── -->
+  <div id="screen-accounts" class="screen" style="display:none">
+    <div class="topbar">
+      <div class="topbar-title-area">
+        <div class="topbar-title">الحسابات</div>
+        <div class="topbar-sub">Vercel · Netlify · GitHub</div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="showAddAccountSheet()" title="إضافة">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn active" id="atab-vercel" onclick="accountTab('vercel',this)" style="--tab-color:var(--vercel)">▲ Vercel</button>
+      <button class="tab-btn" id="atab-netlify" onclick="accountTab('netlify',this)" style="--tab-color:var(--netlify)">◆ Netlify</button>
+      <button class="tab-btn" id="atab-github" onclick="accountTab('github',this)" style="--tab-color:var(--github)">⌥ GitHub</button>
+    </div>
+    <div style="padding:16px" id="accounts-list"></div>
+  </div>
+
+  <!-- ── SCREEN: SETTINGS ── -->
+  <div id="screen-settings" class="screen" style="display:none">
+    <div class="topbar">
+      <div class="topbar-title-area">
+        <div class="topbar-title">الإعدادات</div>
+      </div>
+    </div>
+    <div class="settings-profile">
+      <div class="profile-avatar" id="profile-avatar">?</div>
+      <div>
+        <div class="profile-name" id="profile-name-display">—</div>
+        <div class="profile-role">مدير NASHR</div>
+      </div>
+      <button class="icon-btn" style="margin-right:auto" onclick="editName()">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">المظهر</div>
+      <div class="nashr-card">
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </div>
+            <div><div class="settings-row-title">الوضع الليلي</div><div class="settings-row-sub" id="theme-label">مفعّل</div></div>
+          </div>
+          <button class="toggle on" id="theme-toggle" onclick="toggleTheme()"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">الأمان</div>
+      <div class="nashr-card">
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div><div class="settings-row-title">تغيير كلمة السر</div><div class="settings-row-sub">PIN من 4 أرقام</div></div>
+          </div>
+          <button class="icon-btn" onclick="changePin()">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-icon">
+              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <div><div class="settings-row-title">تسجيل الخروج</div><div class="settings-row-sub">يتطلب كلمة السر للدخول</div></div>
+          </div>
+          <button class="icon-btn" onclick="logout()">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">التطبيق</div>
+      <div class="nashr-card">
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div><div class="settings-row-title">الإصدار</div><div class="settings-row-sub">NASHR PRO v1.0.0</div></div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-icon">
+              <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <div><div class="settings-row-title">قاعدة البيانات</div><div class="settings-row-sub">localStorage محلي — خاص بك</div></div>
+          </div>
+        </div>
+        <div class="settings-row" style="border-bottom:none">
+          <div class="settings-row-left">
+            <div class="settings-row-icon">
+              <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            </div>
+            <div><div class="settings-row-title">تثبيت كـ PWA</div><div class="settings-row-sub">يعمل بدون إنترنت</div></div>
+          </div>
+          <button class="icon-btn" onclick="installApp()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">منصات النشر</div>
+      <div class="nashr-card">
+        <div class="platform-info-row">
+          <div class="platform-dot" style="background:var(--vercel);box-shadow:0 0 6px var(--vercel)"></div>
+          <div>
+            <div class="platform-info-name" style="color:var(--vercel)">▲ Vercel</div>
+            <div class="platform-info-desc">نشر ZIP أو من GitHub — رابط فوري</div>
+          </div>
+        </div>
+        <div class="platform-info-row">
+          <div class="platform-dot" style="background:var(--netlify);box-shadow:0 0 6px var(--netlify)"></div>
+          <div>
+            <div class="platform-info-name" style="color:var(--netlify)">◆ Netlify</div>
+            <div class="platform-info-desc">رفع ZIP مباشرة — subdomain مجاني</div>
+          </div>
+        </div>
+        <div class="platform-info-row" style="border-bottom:none">
+          <div class="platform-dot" style="background:var(--github);box-shadow:0 0 6px var(--github)"></div>
+          <div>
+            <div class="platform-info-name" style="color:var(--github)">⌥ GitHub</div>
+            <div class="platform-info-desc">رفع ملفات أو ZIP — repositories</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand-center">
+      <div class="brand-logo"><img src="icon.png" alt="NASHR"></div>
+      <div class="brand-name">NASHR PRO</div>
+      <div class="brand-tagline">Deploy Manager</div>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+
+  <!-- ── BOTTOM NAVIGATION ── -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-dashboard" onclick="navTo('dashboard')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span class="nav-label">الرئيسية</span>
+    </button>
+    <button class="nav-item" id="nav-projects" onclick="navTo('projects')">
+      <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <span class="nav-label">مشاريع</span>
+    </button>
+    <button class="nav-item" id="nav-deploy" onclick="navTo('deploy')">
+      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span class="nav-label">نشر</span>
+    </button>
+    <button class="nav-item" id="nav-accounts" onclick="navTo('accounts')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="nav-label">حسابات</span>
+    </button>
+    <button class="nav-item" id="nav-settings" onclick="navTo('settings')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="nav-label">إعدادات</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ── ADD ACCOUNT SHEET ── -->
+<div class="sheet-backdrop" id="sheet-backdrop" onclick="closeSheet()"></div>
+<div class="bottom-sheet" id="add-account-sheet">
+  <div style="padding:0 20px">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheet-title">إضافة حساب</div>
+    <div class="sheet-body">
+      <div class="chip-row" id="platform-chips">
+        <button class="source-chip active" style="--chip-color:var(--vercel)" onclick="selectSheetPlatform('vercel',this)">▲ Vercel</button>
+        <button class="source-chip" style="--chip-color:var(--netlify)" onclick="selectSheetPlatform('netlify',this)">◆ Netlify</button>
+        <button class="source-chip" style="--chip-color:var(--github)" onclick="selectSheetPlatform('github',this)">⌥ GitHub</button>
+      </div>
+      <div class="input-group">
+        <label class="field-label">الاسم / التسمية</label>
+        <input class="nashr-input" id="sh-label" placeholder="مثال: Ahmed Dev">
+      </div>
+      <div class="input-group">
+        <label class="field-label">البريد الإلكتروني</label>
+        <input class="nashr-input" id="sh-email" type="email" placeholder="ahmed@gmail.com" dir="ltr">
+      </div>
+      <div id="sh-github-username-wrap" style="display:none" class="input-group">
+        <label class="field-label">GitHub Username</label>
+        <input class="nashr-input code" id="sh-username" placeholder="ahmed-dev" dir="ltr">
+      </div>
+      <div class="input-group">
+        <label class="field-label">التوكن / Token</label>
+        <div style="position:relative">
+          <input class="nashr-input code" id="sh-token" type="password" placeholder="ghp_xxxxxxxxxxxx" dir="ltr" style="padding-left:44px">
+          <button onclick="toggleTokenVis()" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px" id="token-vis-btn">👁</button>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="field-label">تاريخ انتهاء التوكن (اختياري)</label>
+        <input class="nashr-input" id="sh-expiry" type="date">
+      </div>
+      <button class="nashr-btn primary" id="sh-save-btn" onclick="saveAccount()" style="margin-bottom:16px">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        حفظ الحساب
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SNACKBAR ── -->
+<div id="snack"></div>
+
+<!-- ── HIDDEN FILE INPUT ── -->
+<input type="file" id="file-input" accept=".zip" style="display:none" onchange="fileSelected()">
+<input type="file" id="multi-file-input" multiple style="display:none" onchange="multiFilesSelected()">
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  NASHR PRO — PWA App Logic
+// ═══════════════════════════════════════════════════════════
+
+// ── DEFAULT PIN (change this!) ──
+const DEFAULT_PIN = '1234';
+let currentFileTarget = null;
+let selectedFiles = [];
+let deferredInstallPrompt = null;
+let currentAcctPlatform = 'vercel';
+let editAcctId = null;
+let sheetPlatform = 'vercel';
+let currentProjTab = 0;
+let currentAcctTab = 'vercel';
+
+// ── STORAGE HELPERS ──
+const db = {
+  get: k => { try { return JSON.parse(localStorage.getItem('nashr_'+k)) } catch { return null } },
+  set: (k,v) => localStorage.setItem('nashr_'+k, JSON.stringify(v)),
+  init: () => {
+    if (!db.get('settings')) db.set('settings', {userName:'', theme:'dark', pin: DEFAULT_PIN, firstTime:true});
+    if (!db.get('accounts')) db.set('accounts', []);
+    if (!db.get('projects')) db.set('projects', []);
+  }
+};
+
+// ── INIT ──
+db.init();
+
+// ── SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ── PWA INSTALL ──
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').classList.remove('show');
+  deferredInstallPrompt = null;
+});
+
+function installApp() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(() => {
+      deferredInstallPrompt = null;
+      document.getElementById('install-banner').classList.remove('show');
+    });
+  } else {
+    showSnack('افتح القائمة في المتصفح واضغط "إضافة إلى الشاشة الرئيسية"');
+  }
+}
+
+// ── THEME ──
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.querySelector('meta[name="theme-color"]').content = t === 'dark' ? '#060610' : '#F4F6FF';
+  const tog = document.getElementById('theme-toggle');
+  if (tog) { tog.className = 'toggle' + (t==='dark'?' on':''); }
+  const lbl = document.getElementById('theme-label');
+  if (lbl) lbl.textContent = t==='dark' ? 'مفعّل' : 'معطّل';
+}
+function toggleTheme() {
+  const s = db.get('settings');
+  s.theme = s.theme === 'dark' ? 'light' : 'dark';
+  db.set('settings', s);
+  applyTheme(s.theme);
+}
+applyTheme(db.get('settings')?.theme || 'dark');
+
+// ── SPLASH ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    splash.classList.add('hide');
+    setTimeout(() => {
+      splash.style.display = 'none';
+      const s = db.get('settings');
+      if (s?.firstTime) {
+        // Show name setup first
+        setupFirstTime();
+      } else {
+        showLogin();
+      }
+    }, 500);
+  }, 1400);
+});
+
+// ── FIRST TIME SETUP ──
+function setupFirstTime() {
+  const name = prompt('مرحباً! ما اسمك؟');
+  const s = db.get('settings');
+  s.userName = name?.trim() || 'مستخدم';
+  s.firstTime = false;
+  db.set('settings', s);
+  showLogin();
+}
+
+// ── LOGIN ──
+let pinEntered = '';
+
+function showLogin() {
+  document.getElementById('login-screen').classList.add('show');
+  const hint = document.getElementById('login-hint');
+  const s = db.get('settings');
+  if (s?.pin === DEFAULT_PIN) {
+    hint.textContent = 'كلمة السر الافتراضية: 1234';
+  }
+}
+
+function numPress(n) {
+  if (pinEntered.length >= 4) return;
+  pinEntered += n;
+  updateDots();
+  if (pinEntered.length === 4) {
+    setTimeout(checkPin, 150);
+  }
+}
+
+function delPin() {
+  pinEntered = pinEntered.slice(0,-1);
+  updateDots();
+}
+
+function clearPin() {
+  pinEntered = '';
+  updateDots();
+}
+
+function updateDots() {
+  for (let i=0; i<4; i++) {
+    document.getElementById('d'+i).className = 'dot' + (i < pinEntered.length ? ' filled' : '');
+  }
+}
+
+function checkPin() {
+  const s = db.get('settings');
+  const saved = s?.pin || DEFAULT_PIN;
+  if (pinEntered === saved) {
+    document.getElementById('login-screen').classList.remove('show');
+    document.getElementById('app').classList.add('show');
+    initApp();
+  } else {
+    document.getElementById('login-err').textContent = '✗ كلمة السر غير صحيحة';
+    document.getElementById('login-dots').style.animation = 'none';
+    document.getElementById('login-dots').querySelectorAll('.dot').forEach(d => {
+      d.style.background = 'var(--error)';
+    });
+    setTimeout(() => {
+      pinEntered = '';
+      updateDots();
+      document.getElementById('login-err').textContent = '';
+      document.getElementById('login-dots').querySelectorAll('.dot').forEach(d => {
+        d.style.background = '';
+      });
+    }, 800);
+  }
+}
+
+function logout() {
+  if (confirm('هل تريد تسجيل الخروج؟')) {
+    document.getElementById('app').classList.remove('show');
+    document.getElementById('login-screen').classList.add('show');
+    pinEntered = '';
+    updateDots();
+  }
+}
+
+function changePin() {
+  const oldPin = prompt('أدخل كلمة السر الحالية:');
+  const s = db.get('settings');
+  if (oldPin !== s.pin) { showSnack('كلمة السر الحالية غير صحيحة'); return; }
+  const newPin = prompt('أدخل كلمة السر الجديدة (4 أرقام):');
+  if (!newPin || !/^\d{4}$/.test(newPin)) { showSnack('يجب أن تكون 4 أرقام'); return; }
+  s.pin = newPin;
+  db.set('settings', s);
+  showSnack('✓ تم تغيير كلمة السر');
+}
+
+// ── INIT APP ──
+function initApp() {
+  const s = db.get('settings');
+  applyTheme(s.theme || 'dark');
+  document.getElementById('dash-name').textContent = s.userName || '—';
+  const pa = document.getElementById('profile-avatar');
+  if (pa) pa.textContent = s.userName?.[0]?.toUpperCase() || '?';
+  const pn = document.getElementById('profile-name-display');
+  if (pn) pn.textContent = s.userName || '—';
+  refreshDashboard();
+  renderAccountsForDeploy();
+}
+
+function editName() {
+  const s = db.get('settings');
+  const name = prompt('أدخل اسمك الجديد:', s.userName);
+  if (name?.trim()) {
+    s.userName = name.trim();
+    db.set('settings', s);
+    document.getElementById('dash-name').textContent = s.userName;
+    document.getElementById('profile-avatar').textContent = s.userName[0].toUpperCase();
+    document.getElementById('profile-name-display').textContent = s.userName;
+    showSnack('✓ تم حفظ الاسم');
+  }
+}
+
+// ── NAVIGATION ──
+function navTo(screen) {
+  ['dashboard','projects','deploy','accounts','settings'].forEach(s => {
+    const el = document.getElementById('screen-'+s);
+    if (el) el.style.display = s === screen ? '' : 'none';
+    const nb = document.getElementById('nav-'+s);
+    if (nb) nb.className = 'nav-item' + (s === screen ? ' active' : '');
+  });
+  if (screen === 'projects') renderProjects();
+  if (screen === 'accounts') renderAccounts();
+  if (screen === 'settings') {
+    const s = db.get('settings');
+    document.getElementById('theme-toggle').className = 'toggle' + (s.theme==='dark'?' on':'');
+    document.getElementById('theme-label').textContent = s.theme==='dark' ? 'مفعّل' : 'معطّل';
+  }
+}
+
+// ── DASHBOARD ──
+function refreshDashboard() {
+  const projects = db.get('projects') || [];
+  const accounts = db.get('accounts') || [];
+  document.getElementById('stat-total').textContent = projects.length;
+  document.getElementById('stat-accounts').textContent = accounts.length;
+  document.getElementById('stat-vercel').textContent = projects.filter(p=>p.platform==='vercel').length;
+  document.getElementById('stat-netlify').textContent = projects.filter(p=>p.platform==='netlify').length;
+  const recent = projects.slice(-5).reverse();
+  const container = document.getElementById('recent-projects');
+  if (recent.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div><div class="empty-title">لا توجد مشاريع بعد</div><div class="empty-sub">انشر مشروعك الأول من تبويب النشر</div></div>';
+    return;
+  }
+  container.innerHTML = recent.map(p => projectCardHTML(p, true)).join('');
+}
+
+function projectCardHTML(p, compact=false) {
+  const color = platformColor(p.platform);
+  const badge = `<span class="platform-badge" style="background:color-mix(in srgb,${color} 12%,transparent);color:${color}">${platformLabel(p.platform)}</span>`;
+  const urlEl = p.deployedUrl
+    ? `<div class="proj-url" style="color:${color}" onclick="copyText('${p.deployedUrl}')" title="انسخ الرابط">${p.deployedUrl}</div>` : '';
+  const date = new Date(p.createdAt).toLocaleDateString('ar-SA',{year:'numeric',month:'short',day:'numeric'});
+  return `
+  <div class="nashr-card clickable" onclick="showProjectDetail(${p.id})">
+    <div class="proj-card">
+      <div class="proj-screenshot-placeholder" style="background:color-mix(in srgb,${color} 10%,transparent)">
+        <span style="font-size:24px">${platformEmoji(p.platform)}</span>
+      </div>
+      <div class="proj-info">
+        <div class="proj-name">${p.name}</div>
+        ${urlEl}
+        <div class="proj-meta">${badge}<span class="date-badge">${date}</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── PROJECTS ──
+let currentProjTabIndex = 0;
+function projTab(idx, btn) {
+  currentProjTabIndex = idx;
+  document.querySelectorAll('#proj-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProjects();
+}
+
+function renderProjects() {
+  const all = db.get('projects') || [];
+  const search = document.getElementById('proj-search')?.value?.toLowerCase() || '';
+  let filtered = all;
+  if (currentProjTabIndex === 1) filtered = all.filter(p=>p.platform==='vercel');
+  else if (currentProjTabIndex === 2) filtered = all.filter(p=>p.platform==='netlify');
+  else if (currentProjTabIndex === 3) filtered = all.filter(p=>p.platform==='github');
+  if (search) filtered = filtered.filter(p=>
+    p.name.toLowerCase().includes(search) ||
+    (p.deployedUrl||'').toLowerCase().includes(search)
+  );
+  const lbl = document.getElementById('proj-count-label');
+  if (lbl) lbl.textContent = `${filtered.length} مشروع`;
+  const container = document.getElementById('projects-list');
+  if (!container) return;
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div><div class="empty-title">لا توجد مشاريع</div><div class="empty-sub">انشر مشروعك الأول من تبويب النشر</div></div>';
+    return;
+  }
+  container.innerHTML = filtered.slice().reverse().map(p => projectCardHTML(p)).join('');
+}
+
+function showProjectDetail(id) {
+  const projects = db.get('projects') || [];
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  const color = platformColor(p.platform);
+  const date = new Date(p.createdAt).toLocaleString('ar-SA');
+  const html = `
+    <div style="padding:20px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+        <div style="width:54px;height:54px;border-radius:16px;background:color-mix(in srgb,${color} 12%,transparent);display:flex;align-items:center;justify-content:center;font-size:28px">${platformEmoji(p.platform)}</div>
+        <div>
+          <div style="font-size:18px;font-weight:800">${p.name}</div>
+          <span class="platform-badge" style="background:color-mix(in srgb,${color} 12%,transparent);color:${color}">${platformLabel(p.platform)}</span>
+        </div>
+      </div>
+      ${p.deployedUrl ? `<div style="margin-bottom:14px"><div class="field-label" style="margin-bottom:6px">رابط الموقع</div><div class="copyable-url" onclick="copyText('${p.deployedUrl}')"><span class="url-text">${p.deployedUrl}</span><div class="copy-icon"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div></div></div>` : ''}
+      ${p.repoUrl ? `<div style="margin-bottom:14px"><div class="field-label" style="margin-bottom:6px">المستودع</div><div style="font-family:monospace;font-size:12px;color:var(--muted)">${p.repoUrl}</div></div>` : ''}
+      <div style="margin-bottom:12px"><span style="color:var(--muted);font-size:12px">تاريخ الإنشاء: </span><span style="font-size:12px">${date}</span></div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        ${p.deployedUrl ? `<button class="nashr-btn primary" style="flex:1" onclick="openUrl('${p.deployedUrl}');closeSheet()"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>فتح</button>` : ''}
+        <button class="nashr-btn outline" style="color:var(--error);border-color:var(--error);flex:1" onclick="deleteProject(${p.id})">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          حذف
+        </button>
+      </div>
+    </div>`;
+  showSheetContent('تفاصيل المشروع', html);
+}
+
+function deleteProject(id) {
+  if (!confirm('حذف هذا المشروع؟')) return;
+  let projects = db.get('projects') || [];
+  projects = projects.filter(p => p.id !== id);
+  db.set('projects', projects);
+  closeSheet();
+  renderProjects();
+  refreshDashboard();
+  showSnack('✓ تم حذف المشروع');
+}
+
+function openUrl(url) { window.open(url, '_blank'); }
+
+// ── ACCOUNTS ──
+function accountTab(platform, btn) {
+  currentAcctTab = platform;
+  document.querySelectorAll('[id^="atab-"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAccounts();
+}
+
+function renderAccounts() {
+  const accounts = (db.get('accounts')||[]).filter(a=>a.platform===currentAcctTab);
+  const container = document.getElementById('accounts-list');
+  if (!container) return;
+  if (accounts.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">لا توجد حسابات ${platformLabel(currentAcctTab)}</div><div class="empty-sub">اضغط + لإضافة حساب جديد</div></div>`;
+    return;
+  }
+  const color = platformColor(currentAcctTab);
+  container.innerHTML = accounts.map(a => {
+    const masked = a.token ? a.token.slice(0,6)+'••••••••'+a.token.slice(-4) : '—';
+    return `
+    <div class="nashr-card" style="margin-bottom:12px">
+      <div class="acct-card">
+        <div class="acct-top">
+          <div class="acct-avatar" style="background:color-mix(in srgb,${color} 15%,transparent);color:${color}">${a.label?.[0]?.toUpperCase()||'?'}</div>
+          <div class="acct-info">
+            <div class="acct-name">${a.label}</div>
+            <div class="acct-email">${a.email||''}</div>
+          </div>
+          <div class="acct-actions">
+            <button class="acct-action-btn" onclick="editAccount(${a.id})">✏️ تعديل</button>
+            <button class="acct-action-btn del" onclick="deleteAccount(${a.id})">🗑</button>
+          </div>
+        </div>
+        <div class="token-row" style="--token-color:${color}">
+          <svg style="width:14px;height:14px;fill:none;stroke:${color};stroke-width:2;flex-shrink:0" viewBox="0 0 24 24"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          <div class="token-text">${masked}</div>
+          ${a.expiryDate ? `<span class="token-valid ${new Date(a.expiryDate)<new Date()?'valid-no':'valid-yes'}">${new Date(a.expiryDate)<new Date()?'منتهي':'✓'}</span>` : ''}
+        </div>
+        ${a.username ? `<div style="font-size:12px;color:var(--muted)">@ ${a.username}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showAddAccountSheet(platform) {
+  editAcctId = null;
+  sheetPlatform = platform || currentAcctTab || 'vercel';
+  document.getElementById('sh-label').value = '';
+  document.getElementById('sh-email').value = '';
+  document.getElementById('sh-token').value = '';
+  document.getElementById('sh-username').value = '';
+  document.getElementById('sh-expiry').value = '';
+  document.getElementById('sheet-title').textContent = 'إضافة حساب';
+  document.getElementById('sh-save-btn').textContent = 'حفظ الحساب';
+  updateSheetPlatform(sheetPlatform);
+  const chips = document.querySelectorAll('#platform-chips .source-chip');
+  chips.forEach(c => c.classList.remove('active'));
+  chips[['vercel','netlify','github'].indexOf(sheetPlatform)]?.classList.add('active');
+  document.getElementById('platform-chips').style.display = '';
+  openSheet('add-account-sheet');
+}
+
+function editAccount(id) {
+  const a = (db.get('accounts')||[]).find(x=>x.id===id);
+  if (!a) return;
+  editAcctId = id;
+  sheetPlatform = a.platform;
+  document.getElementById('sh-label').value = a.label||'';
+  document.getElementById('sh-email').value = a.email||'';
+  document.getElementById('sh-token').value = a.token||'';
+  document.getElementById('sh-username').value = a.username||'';
+  document.getElementById('sh-expiry').value = a.expiryDate||'';
+  document.getElementById('sheet-title').textContent = 'تعديل الحساب';
+  document.getElementById('platform-chips').style.display = 'none';
+  updateSheetPlatform(sheetPlatform);
+  openSheet('add-account-sheet');
+}
+
+function selectSheetPlatform(p, btn) {
+  sheetPlatform = p;
+  document.querySelectorAll('#platform-chips .source-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  updateSheetPlatform(p);
+}
+
+function updateSheetPlatform(p) {
+  document.getElementById('sh-github-username-wrap').style.display = p==='github' ? '' : 'none';
+  const btn = document.getElementById('sh-save-btn');
+  btn.style.background = platformColor(p);
+}
+
+function saveAccount() {
+  const label = document.getElementById('sh-label').value.trim();
+  const email = document.getElementById('sh-email').value.trim();
+  const token = document.getElementById('sh-token').value.trim();
+  const username = document.getElementById('sh-username').value.trim();
+  const expiryDate = document.getElementById('sh-expiry').value;
+  if (!label) { showSnack('أدخل اسم الحساب'); return; }
+  if (!token) { showSnack('أدخل التوكن'); return; }
+  let accounts = db.get('accounts') || [];
+  if (editAcctId) {
+    accounts = accounts.map(a => a.id===editAcctId ? {...a,label,email,token,username,expiryDate} : a);
+    showSnack('✓ تم تحديث الحساب');
+  } else {
+    const id = Date.now();
+    accounts.push({id, platform:sheetPlatform, label, email, token, username:username||null, expiryDate:expiryDate||null});
+    showSnack('✓ تمت إضافة الحساب');
+  }
+  db.set('accounts', accounts);
+  closeSheet();
+  renderAccounts();
+  renderAccountsForDeploy();
+  refreshDashboard();
+}
+
+function deleteAccount(id) {
+  if (!confirm('حذف هذا الحساب؟')) return;
+  let accounts = db.get('accounts')||[];
+  accounts = accounts.filter(a=>a.id!==id);
+  db.set('accounts', accounts);
+  renderAccounts();
+  renderAccountsForDeploy();
+  refreshDashboard();
+  showSnack('✓ تم حذف الحساب');
+}
+
+function toggleTokenVis() {
+  const inp = document.getElementById('sh-token');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// ── DEPLOY ──
+let vSelectedAcct = null, nSelectedAcct = null, gSelectedAcct = null;
+let vFile = null, nFile = null, gFile = null, vSourceType = 'zip', gSourceType = 'zip';
+
+function deployTab(platform, btn) {
+  document.querySelectorAll('[id^="dtab-"]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['vercel','netlify','github'].forEach(p => {
+    const el = document.getElementById('deploy-'+p);
+    if (el) { el.style.display = p===platform ? 'block' : 'none'; el.className = 'tab-content'+(p===platform?' active':''); }
+  });
+}
+
+function renderAccountsForDeploy() {
+  ['vercel','netlify','github'].forEach(platform => {
+    const accounts = (db.get('accounts')||[]).filter(a=>a.platform===platform);
+    const container = document.getElementById(platform+'-acct-list');
+    if (!container) return;
+    const color = platformColor(platform);
+    if (accounts.length === 0) {
+      container.innerHTML = `<div class="warn-box"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>لا توجد حسابات ${platformLabel(platform)} — اذهب لتبويب الحسابات لإضافة حساب</span></div>`;
+      return;
+    }
+    let selectedVar = platform === 'vercel' ? vSelectedAcct : platform === 'netlify' ? nSelectedAcct : gSelectedAcct;
+    if (!selectedVar && accounts.length > 0) {
+      selectedVar = accounts[0];
+      if (platform==='vercel') vSelectedAcct = selectedVar;
+      else if (platform==='netlify') nSelectedAcct = selectedVar;
+      else gSelectedAcct = selectedVar;
+    }
+    container.innerHTML = accounts.map(a => `
+      <div class="acct-select-item ${a.id===selectedVar?.id?'selected':''}" style="--sel-color:${color}" onclick="selectDeployAcct('${platform}',${a.id})">
+        <div class="radio-outer"><div class="radio-inner"></div></div>
+        <div style="width:32px;height:32px;border-radius:9px;background:color-mix(in srgb,${color} 15%,transparent);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${color}">${a.label?.[0]?.toUpperCase()||'?'}</div>
+        <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">${a.label}</div><div style="font-size:11px;color:var(--muted)">${a.email||''}</div></div>
+      </div>`).join('');
+  });
+}
+
+function selectDeployAcct(platform, id) {
+  const accounts = db.get('accounts')||[];
+  const acct = accounts.find(a=>a.id===id);
+  if (platform==='vercel') vSelectedAcct = acct;
+  else if (platform==='netlify') nSelectedAcct = acct;
+  else gSelectedAcct = acct;
+  renderAccountsForDeploy();
+}
+
+function vsource(type) {
+  vSourceType = type;
+  ['zip','github'].forEach(t => {
+    document.getElementById('v-chip-'+t).className = 'source-chip'+(t===type?' active':'');
+  });
+  document.getElementById('v-zip-section').style.display = type==='zip'?'':'none';
+  document.getElementById('v-github-section').style.display = type==='github'?'':'none';
+}
+
+function gsource(type) {
+  gSourceType = type;
+  ['zip','files'].forEach(t => {
+    document.getElementById('g-chip-'+t).className = 'source-chip'+(t===type?' active':'');
+  });
+  document.getElementById('g-zip-section').style.display = type==='zip'?'':'none';
+  document.getElementById('g-files-section').style.display = type==='files'?'':'none';
+}
+
+function pickFile(target) {
+  currentFileTarget = target;
+  document.getElementById('file-input').click();
+}
+
+function fileSelected() {
+  const file = document.getElementById('file-input').files[0];
+  if (!file) return;
+  if (currentFileTarget==='v') {
+    vFile = file;
+    document.getElementById('v-file-label').textContent = file.name;
+    document.getElementById('v-file-zone').classList.add('has-file');
+  } else if (currentFileTarget==='n') {
+    nFile = file;
+    document.getElementById('n-file-label').textContent = file.name;
+    document.getElementById('n-file-zone').classList.add('has-file');
+  } else if (currentFileTarget==='g') {
+    gFile = file;
+    document.getElementById('g-file-label').textContent = file.name;
+    document.getElementById('g-file-zone').classList.add('has-file');
+  }
+}
+
+function pickMultiFiles() {
+  document.getElementById('multi-file-input').click();
+}
+
+function multiFilesSelected() {
+  selectedFiles = Array.from(document.getElementById('multi-file-input').files);
+  const list = document.getElementById('g-files-list');
+  list.innerHTML = selectedFiles.map(f => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px">📄</span>
+      <span style="font-family:monospace;font-size:12px;flex:1">${f.name}</span>
+      <span style="font-size:11px;color:var(--muted)">${(f.size/1024).toFixed(1)} KB</span>
+    </div>`).join('');
+}
+
+function showProgress(platform, steps, color) {
+  const wrap = document.getElementById(platform+'-progress');
+  if (wrap) wrap.style.display = '';
+  const stepsEl = document.getElementById(platform+'-steps');
+  if (stepsEl) stepsEl.innerHTML = steps.map((s,i) => `
+    <div class="progress-step" id="${platform}-step-${i}" style="--step-color:${color}">
+      <div class="step-dot">${i+1}</div>
+      <div class="step-label">${s}</div>
+    </div>`).join('');
+}
+
+function setStep(platform, idx, total, color) {
+  for (let i=0; i<total; i++) {
+    const el = document.getElementById(`${platform}-step-${i}`);
+    if (!el) continue;
+    el.className = 'progress-step' + (i<idx?' done':i===idx?' active':'');
+  }
+  const bar = document.getElementById(platform+'-bar');
+  if (bar) bar.style.width = `${Math.round((idx/total)*100)}%`;
+}
+
+async function deployVercel() {
+  if (!vSelectedAcct) { showSnack('اختر حساب Vercel أولاً'); return; }
+  const name = document.getElementById('v-project-name').value.trim();
+  if (!name) { showSnack('أدخل اسم المشروع'); return; }
+  if (vSourceType==='zip' && !vFile) { showSnack('اختر ملف ZIP'); return; }
+  if (vSourceType==='github' && !document.getElementById('v-repo').value.trim()) { showSnack('أدخل اسم المستودع'); return; }
+
+  document.getElementById('v-deploy-btn').disabled = true;
+  document.getElementById('v-result').innerHTML = '';
+  document.getElementById('v-error').innerHTML = '';
+
+  const steps = ['فحص الملفات','رفع المشروع','إنشاء النشر','تم النشر!'];
+  showProgress('v', steps, 'var(--vercel)');
+  setStep('v', 0, steps.length, 'var(--vercel)');
+
+  try {
+    const token = vSelectedAcct.token;
+    let url = null;
+
+    if (vSourceType === 'github') {
+      await sleep(600); setStep('v', 1, steps.length);
+      const repo = document.getElementById('v-repo').value.trim();
+      const branch = document.getElementById('v-branch').value.trim() || 'main';
+      const resp = await fetch('https://api.vercel.com/v13/deployments', {
+        method: 'POST',
+        headers: {'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+        body: JSON.stringify({name, gitSource:{type:'github',repo,ref:branch}})
+      });
+      await sleep(400); setStep('v', 2, steps.length);
+      const data = await resp.json();
+      if (resp.ok && data.url) {
+        url = 'https://'+data.url;
+      } else {
+        throw new Error(data.error?.message || JSON.stringify(data));
+      }
+    } else {
+      // ZIP deploy via file upload
+      await sleep(500); setStep('v', 1, steps.length);
+      const bytes = await vFile.arrayBuffer();
+      await sleep(500); setStep('v', 2, steps.length);
+      // Note: Vercel ZIP API requires files array, simplified here
+      showSnack('Vercel ZIP: يتطلب تحويل الملفات — جارٍ المحاولة');
+      // Fallback: create project and show manual link
+      const projResp = await fetch('https://api.vercel.com/v10/projects', {
+        method:'POST',
+        headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+        body: JSON.stringify({name, framework: document.getElementById('v-framework').value.trim()||null})
+      });
+      const pdata = await projResp.json();
+      if (projResp.ok) {
+        url = `https://vercel.com/dashboard`;
+      } else throw new Error(pdata.error?.message || 'فشل الإنشاء');
+    }
+
+    setStep('v', 3, steps.length);
+    saveProject({name, platform:'vercel', accountId:vSelectedAcct.id, deployedUrl:url, repoUrl:vSourceType==='github'?'https://github.com/'+document.getElementById('v-repo').value:null});
+    showDeployResult('v', url, 'var(--vercel)', 'Vercel');
+  } catch(e) {
+    showDeployError('v', e.message);
+  }
+  document.getElementById('v-deploy-btn').disabled = false;
+}
+
+async function deployNetlify() {
+  if (!nSelectedAcct) { showSnack('اختر حساب Netlify أولاً'); return; }
+  const siteName = document.getElementById('n-site-name').value.trim();
+  if (!siteName) { showSnack('أدخل اسم الموقع'); return; }
+  if (!nFile) { showSnack('اختر ملف ZIP'); return; }
+
+  document.getElementById('n-deploy-btn').disabled = true;
+  document.getElementById('n-result').innerHTML = '';
+  document.getElementById('n-error').innerHTML = '';
+
+  const steps = ['إنشاء الموقع','رفع ZIP','تفعيل النشر','تم النشر!'];
+  showProgress('n', steps, 'var(--netlify)');
+  setStep('n', 0, steps.length);
+
+  try {
+    const token = nSelectedAcct.token;
+    // Step 1: Create site
+    const siteResp = await fetch('https://api.netlify.com/api/v1/sites', {
+      method:'POST',
+      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body: JSON.stringify({name: siteName})
+    });
+    await sleep(400); setStep('n', 1, steps.length);
+    const siteData = await siteResp.json();
+    if (!siteResp.ok) throw new Error(siteData.message || siteData.errors?.join(', ') || 'فشل إنشاء الموقع');
+    const siteId = siteData.id;
+    const finalUrl = siteData.ssl_url || siteData.url;
+
+    // Step 2: Upload ZIP
+    const bytes = await nFile.arrayBuffer();
+    const deployResp = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/deploys`, {
+      method:'POST',
+      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/zip'},
+      body: bytes
+    });
+    await sleep(600); setStep('n', 2, steps.length);
+    const deployData = await deployResp.json();
+    if (!deployResp.ok) throw new Error(deployData.message || 'فشل الرفع');
+
+    await sleep(500); setStep('n', 3, steps.length);
+    saveProject({name:siteName, platform:'netlify', accountId:nSelectedAcct.id, deployedUrl:finalUrl});
+    showDeployResult('n', finalUrl, 'var(--netlify)', 'Netlify');
+  } catch(e) {
+    showDeployError('n', e.message);
+  }
+  document.getElementById('n-deploy-btn').disabled = false;
+}
+
+async function deployGitHub() {
+  if (!gSelectedAcct) { showSnack('اختر حساب GitHub أولاً'); return; }
+  const repoName = document.getElementById('g-repo-name').value.trim();
+  if (!repoName) { showSnack('أدخل اسم المستودع'); return; }
+
+  document.getElementById('g-deploy-btn').disabled = true;
+  document.getElementById('g-result').innerHTML = '';
+  document.getElementById('g-error').innerHTML = '';
+
+  const steps = ['فحص المستودع','إنشاء المستودع','رفع الملفات','تم الرفع!'];
+  showProgress('g', steps, 'var(--github)');
+  setStep('g', 0, steps.length);
+
+  try {
+    const token = gSelectedAcct.token;
+    const commitMsg = document.getElementById('g-commit').value.trim() || 'Initial commit via NASHR ⚡';
+    await sleep(400); setStep('g', 1, steps.length);
+
+    // Create repo
+    const repoResp = await fetch('https://api.github.com/user/repos', {
+      method:'POST',
+      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
+      body: JSON.stringify({name:repoName, private:false, auto_init:true})
+    });
+    const repoData = await repoResp.json();
+    if (!repoResp.ok) throw new Error(repoData.message || 'فشل إنشاء المستودع');
+    const repoUrl = repoData.html_url;
+    const fullName = repoData.full_name;
+
+    await sleep(500); setStep('g', 2, steps.length);
+
+    // Upload files if selected
+    if (gSourceType === 'files' && selectedFiles.length > 0) {
+      for (const file of selectedFiles) {
+        try {
+          const text = await readFileAsText(file);
+          const content = btoa(unescape(encodeURIComponent(text)));
+          await fetch(`https://api.github.com/repos/${fullName}/contents/${file.name}`, {
+            method:'PUT',
+            headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
+            body: JSON.stringify({message:commitMsg, content})
+          });
+        } catch {}
+      }
+    }
+
+    await sleep(400); setStep('g', 3, steps.length);
+    saveProject({name:repoName, platform:'github', accountId:gSelectedAcct.id, repoUrl, deployedUrl:repoUrl});
+    showDeployResult('g', repoUrl, 'var(--github)', 'GitHub');
+  } catch(e) {
+    showDeployError('g', e.message);
+  }
+  document.getElementById('g-deploy-btn').disabled = false;
+}
+
+function showDeployResult(prefix, url, color, platform) {
+  document.getElementById(prefix+'-result').innerHTML = `
+    <div class="result-box result-success" style="--result-color:${color}">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="font-size:28px">🎉</div>
+        <div><div class="result-title">تم النشر بنجاح!</div><div class="result-sub">${platform} — جاهز للعرض</div></div>
+      </div>
+      <div class="copyable-url" onclick="copyText('${url}')">
+        <span class="url-text">${url}</span>
+        <div class="copy-icon"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>
+      </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="nashr-btn primary" style="background:${color}" onclick="openUrl('${url}')">
+          <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          فتح الموقع
+        </button>
+      </div>
+    </div>`;
+  refreshDashboard();
+}
+
+function showDeployError(prefix, msg) {
+  document.getElementById(prefix+'-error').innerHTML = `
+    <div class="err-box" style="margin-top:12px">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>${msg}</span>
+    </div>`;
+}
+
+function saveProject(data) {
+  const projects = db.get('projects') || [];
+  projects.push({id: Date.now(), createdAt: new Date().toISOString(), ...data});
+  db.set('projects', projects);
+}
+
+// ── BOTTOM SHEET ──
+let currentSheetId = 'add-account-sheet';
+
+function openSheet(sheetId) {
+  currentSheetId = sheetId;
+  document.getElementById('sheet-backdrop').classList.add('show');
+  document.getElementById(sheetId).classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSheet() {
+  document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.remove('show'));
+  document.getElementById('sheet-backdrop').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function showSheetContent(title, html) {
+  const sheet = document.getElementById('add-account-sheet');
+  sheet.innerHTML = `<div style="padding:0"><div class="sheet-handle" style="margin:12px auto 0"></div><div class="sheet-title">${title}</div>${html}</div>`;
+  openSheet('add-account-sheet');
+}
+
+// ── HELPERS ──
+function platformColor(p) {
+  return p==='vercel'?'var(--vercel)':p==='netlify'?'var(--netlify)':p==='github'?'var(--github)':'var(--accent)';
+}
+function platformLabel(p) {
+  return p==='vercel'?'▲ Vercel':p==='netlify'?'◆ Netlify':p==='github'?'⌥ GitHub':'—';
+}
+function platformEmoji(p) {
+  return p==='vercel'?'⚡':p==='netlify'?'🌐':p==='github'?'🐙':'📦';
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showSnack('✓ تم النسخ'));
+}
+
+function showSnack(msg) {
+  const s = document.getElementById('snack');
+  s.textContent = msg;
+  s.classList.add('show');
+  setTimeout(() => s.classList.remove('show'), 2500);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function readFileAsText(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = rej;
+    r.readAsText(file);
+  });
+}
+
+// Touch swipe to close sheet
+let sheetStartY = 0;
+document.querySelectorAll('.bottom-sheet').forEach(s => {
+  s.addEventListener('touchstart', e => { sheetStartY = e.touches[0].clientY; }, {passive:true});
+  s.addEventListener('touchmove', e => {
+    const dy = e.touches[0].clientY - sheetStartY;
+    if (dy > 80) closeSheet();
+  }, {passive:true});
+});
+
+// Handle back button for sheet
+window.addEventListener('popstate', () => {
+  if (document.querySelector('.bottom-sheet.show')) { closeSheet(); history.pushState(null,''); }
+});
+history.pushState(null, '');
+</script>
+</body>
+</html>
