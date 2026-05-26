@@ -45,19 +45,7 @@ jobs:
           npx cap add android
 
       - name: Setup icon
-        run: |
-          cd app
-          mkdir -p assets
-          if [ -f "build/icon_1024.png" ]; then
-            cp build/icon_1024.png assets/icon.png
-          else
-            python3 -c "
-from PIL import Image
-img = Image.open('build/icon.png').convert('RGBA')
-img = img.resize((1024, 1024), Image.LANCZOS)
-img.save('assets/icon.png', 'PNG')
-"
-          fi
+        run: python3 resize_icon.py
 
       - name: Generate assets
         run: |
